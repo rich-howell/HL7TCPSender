@@ -17,7 +17,29 @@ namespace HL7TCPSender
             InitializeComponent();
             var config = LoadConfig();
             txtSendingHost.Text = config.SendingHost;
-            txtPort.Text = config.Port.ToString();
+
+            int portMax = (int)numPort.Maximum;
+            int portMin = (int)numPort.Minimum;
+
+            if (config.Port < portMin || config.Port > portMax)
+            {
+                MessageBox.Show(
+                    $"The port number in appsettings.json ({config.Port}) is outside the allowed range.\n" +
+                    $"Please select a value between {portMin} and {portMax}.",
+                    "Invalid Configuration Value",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+
+                numPort.Value = portMin;
+                Log($"Invalid port in configuration ({config.Port}). Reverting to minimum allowed value {portMin}.");
+
+            }
+            else
+            {
+                numPort.Value = config.Port;
+            }
+
             txtfolderPath.Text = config.FolderPath;
             numDelayMs.Value = config.DelayMs;
             numMaxRetries.Value = config.MaxRetries;
@@ -28,7 +50,7 @@ namespace HL7TCPSender
             var config = new AppConfig
             {
                 SendingHost = txtSendingHost.Text,
-                Port = int.TryParse(txtPort.Text, out int p) ? p : 4040,
+                Port = (int)numPort.Value,
                 FolderPath = txtfolderPath.Text,
                 DelayMs = (int)numDelayMs.Value,
                 MaxRetries = (int)numMaxRetries.Value
@@ -118,7 +140,7 @@ namespace HL7TCPSender
         {
             btn_sendAll.Enabled = false;
             btn_sendSingle.Enabled = false;
-            int total = messageFiles.Count;           
+            int total = messageFiles.Count;
 
             try
             {
@@ -158,7 +180,7 @@ namespace HL7TCPSender
                 progressBarSend.Value = progressBarSend.Maximum;
                 lblProgress.Text = $"{sentCount} / {total} sent";
                 Log("Sending Complete!");
-            } 
+            }
             finally
             {
                 btn_sendAll.Enabled = true;
@@ -169,7 +191,7 @@ namespace HL7TCPSender
         private async Task<bool> SendMessageAsync(string filePath)
         {
             string host = txtSendingHost.Text.Trim();
-            int port = int.TryParse(txtPort.Text.Trim(), out int parsedPort) ? parsedPort : 4040;
+            int port = (int)numPort.Value;
             int MaxRetries = (int)numMaxRetries.Value;
             string hl7 = await File.ReadAllTextAsync(filePath);
             string fileName = Path.GetFileName(filePath);
@@ -249,7 +271,7 @@ namespace HL7TCPSender
                                     int messagesRemaining = int.Parse(txttotalQueue.Text) - 1;
                                     txttotalQueue.Text = messagesRemaining.ToString();
                                 }));
-                               
+
                                 await Task.Delay((int)numDelayMs.Value);
                                 return true;
                             }
@@ -347,7 +369,7 @@ namespace HL7TCPSender
             var files = Directory.GetFiles(folder, "*.hl7");
             int total = files.Length;
 
-            if(total == 0)
+            if (total == 0)
             {
                 Log("No HL7 messages found in folder.");
                 return;
@@ -443,8 +465,8 @@ namespace HL7TCPSender
                 else
                 {
                     lblProgress.Text = "0 / 1 sent (failed)";
-                }            
-            } 
+                }
+            }
             finally
             {
                 btn_sendAll.Enabled = true;
@@ -491,7 +513,7 @@ namespace HL7TCPSender
             Log($"Re-queued {movedCount} failed message(s).");
 
             // Optionally reload the list of queued messages
-            btn_queueMessages_Click(sender, e);            
+            btn_queueMessages_Click(sender, e);
         }
 
         private string GetConfigPath()
@@ -532,5 +554,9 @@ namespace HL7TCPSender
             }
         }
 
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
