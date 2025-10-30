@@ -37,7 +37,6 @@
             txttotalQueue = new TextBox();
             label4 = new Label();
             txtlastSequence = new TextBox();
-            txtLogs = new TextBox();
             btn_clearLogs = new Button();
             btn_dirBrowse = new Button();
             folderBrowser = new FolderBrowserDialog();
@@ -58,6 +57,7 @@
             numPort = new NumericUpDown();
             groupBox1 = new GroupBox();
             groupBox2 = new GroupBox();
+            txtLogs = new RichTextBox();
             groupBox3 = new GroupBox();
             groupBox4 = new GroupBox();
             groupBox5 = new GroupBox();
@@ -158,15 +158,6 @@
             txtlastSequence.ReadOnly = true;
             txtlastSequence.Size = new Size(80, 23);
             txtlastSequence.TabIndex = 10;
-            // 
-            // txtLogs
-            // 
-            txtLogs.Location = new Point(6, 22);
-            txtLogs.Multiline = true;
-            txtLogs.Name = "txtLogs";
-            txtLogs.ScrollBars = ScrollBars.Vertical;
-            txtLogs.Size = new Size(476, 96);
-            txtLogs.TabIndex = 11;
             // 
             // btn_clearLogs
             // 
@@ -343,14 +334,22 @@
             // 
             // groupBox2
             // 
-            groupBox2.Controls.Add(btn_clearLogs);
             groupBox2.Controls.Add(txtLogs);
+            groupBox2.Controls.Add(btn_clearLogs);
             groupBox2.Location = new Point(10, 146);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(490, 155);
             groupBox2.TabIndex = 34;
             groupBox2.TabStop = false;
             groupBox2.Text = "Logs";
+            // 
+            // txtLogs
+            // 
+            txtLogs.Location = new Point(8, 22);
+            txtLogs.Name = "txtLogs";
+            txtLogs.Size = new Size(476, 96);
+            txtLogs.TabIndex = 14;
+            txtLogs.Text = "";
             // 
             // groupBox3
             // 
@@ -421,7 +420,6 @@
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);
-            groupBox2.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
             groupBox4.ResumeLayout(false);
@@ -444,7 +442,6 @@
         private TextBox txttotalQueue;
         private Label label4;
         private TextBox txtlastSequence;
-        private TextBox txtLogs;
         private Button btn_clearLogs;
         private Button btn_dirBrowse;
         private FolderBrowserDialog folderBrowser;
@@ -469,5 +466,6 @@
         private GroupBox groupBox4;
         private GroupBox groupBox5;
         private GroupBox groupBox6;
+        private RichTextBox txtLogs;
     }
 }
