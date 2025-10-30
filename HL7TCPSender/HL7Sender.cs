@@ -1,4 +1,3 @@
-using NHapi.Base.Model;
 using NHapi.Base.Parser;
 using NHapi.Base.Util;
 using System.Net.Sockets;
@@ -43,20 +42,6 @@ namespace HL7TCPSender
             txtfolderPath.Text = config.FolderPath;
             numDelayMs.Value = config.DelayMs;
             numMaxRetries.Value = config.MaxRetries;
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            var config = new AppConfig
-            {
-                SendingHost = txtSendingHost.Text,
-                Port = (int)numPort.Value,
-                FolderPath = txtfolderPath.Text,
-                DelayMs = (int)numDelayMs.Value,
-                MaxRetries = (int)numMaxRetries.Value
-            };
-
-            SaveConfig(config);
         }
 
         private void Log(string message)
@@ -122,7 +107,7 @@ namespace HL7TCPSender
 
         private void btn_clearLogs_Click(object sender, EventArgs e)
         {
-            if (txtLogs.Text.Length > 0)
+            if (!string.IsNullOrWhiteSpace(txtLogs.Text))
             {
                 txtLogs.Clear();
             }
@@ -130,7 +115,7 @@ namespace HL7TCPSender
 
         private void btn_clearPath_Click(object sender, EventArgs e)
         {
-            if (txtfolderPath.Text.Length > 0)
+            if (!string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
             {
                 txtfolderPath.Clear();
             }
@@ -138,13 +123,18 @@ namespace HL7TCPSender
 
         private async void btn_sendAll_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
+            {
+                MessageBox.Show("Select a Message Path before queuing messages");
+                return;
+            }
+
             btn_sendAll.Enabled = false;
             btn_sendSingle.Enabled = false;
             int total = messageFiles.Count;
 
             try
             {
-
                 if (total == 0)
                 {
                     Log($"No messages in queue");
@@ -358,6 +348,12 @@ namespace HL7TCPSender
 
         private async void btn_queueMessages_Click(object sender, EventArgs e)
         {
+            if (!string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
+            {
+                MessageBox.Show("Select a Message Path before queuing messages");
+                return;
+            }
+
             string folder = txtfolderPath.Text.Trim();
 
             if (!Directory.Exists(folder))
@@ -440,6 +436,12 @@ namespace HL7TCPSender
 
         private async void btn_sendSingle_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
+            {
+                MessageBox.Show("Select a Message Path before queuing messages");
+                return;
+            }
+
             btn_sendAll.Enabled = false;
             btn_sendSingle.Enabled = false;
             try
@@ -476,7 +478,13 @@ namespace HL7TCPSender
 
         private void btnRequeueFailed_Click(object sender, EventArgs e)
         {
-            string baseFolder = txtfolderPath.Text.Trim(); // or your configured folder
+            if (string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
+            {
+                MessageBox.Show("Select a Message Path before attempting to move failed messages");
+                return;
+            }
+
+            string baseFolder = txtfolderPath.Text.Trim();
             string failedFolder = Path.Combine(baseFolder, "Failed");
             string toSendFolder = baseFolder;
 
@@ -554,9 +562,18 @@ namespace HL7TCPSender
             }
         }
 
-        private void label9_Click(object sender, EventArgs e)
+        private void HL7Sender_FormClosing(object sender, FormClosingEventArgs e)
         {
+            var config = new AppConfig
+            {
+                SendingHost = txtSendingHost.Text,
+                Port = (int)numPort.Value,
+                FolderPath = txtfolderPath.Text,
+                DelayMs = (int)numDelayMs.Value,
+                MaxRetries = (int)numMaxRetries.Value
+            };
 
+            SaveConfig(config);
         }
     }
 }

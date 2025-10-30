@@ -33,7 +33,6 @@
             btn_sendAll = new Button();
             label1 = new Label();
             txtAck = new TextBox();
-            label2 = new Label();
             label3 = new Label();
             txttotalQueue = new TextBox();
             label4 = new Label();
@@ -46,7 +45,6 @@
             lblmessagePath = new Label();
             btn_clearPath = new Button();
             lstMessages = new ListBox();
-            label6 = new Label();
             chkArchive = new CheckBox();
             btnRequeueFailed = new Button();
             progressBarSend = new ProgressBar();
@@ -61,17 +59,23 @@
             groupBox1 = new GroupBox();
             groupBox2 = new GroupBox();
             groupBox3 = new GroupBox();
+            groupBox4 = new GroupBox();
+            groupBox5 = new GroupBox();
+            groupBox6 = new GroupBox();
             ((System.ComponentModel.ISupportInitialize)numDelayMs).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numMaxRetries).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numPort).BeginInit();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
+            groupBox4.SuspendLayout();
+            groupBox5.SuspendLayout();
+            groupBox6.SuspendLayout();
             SuspendLayout();
             // 
             // btn_queueMessages
             // 
-            btn_queueMessages.Location = new Point(6, 34);
+            btn_queueMessages.Location = new Point(6, 20);
             btn_queueMessages.Name = "btn_queueMessages";
             btn_queueMessages.Size = new Size(107, 23);
             btn_queueMessages.TabIndex = 0;
@@ -81,7 +85,7 @@
             // 
             // btn_sendSingle
             // 
-            btn_sendSingle.Location = new Point(134, 34);
+            btn_sendSingle.Location = new Point(134, 20);
             btn_sendSingle.Name = "btn_sendSingle";
             btn_sendSingle.Size = new Size(135, 23);
             btn_sendSingle.TabIndex = 1;
@@ -91,7 +95,7 @@
             // 
             // btn_sendAll
             // 
-            btn_sendAll.Location = new Point(288, 34);
+            btn_sendAll.Location = new Point(288, 20);
             btn_sendAll.Name = "btn_sendAll";
             btn_sendAll.Size = new Size(163, 23);
             btn_sendAll.TabIndex = 2;
@@ -111,27 +115,17 @@
             // 
             // txtAck
             // 
-            txtAck.Location = new Point(10, 27);
+            txtAck.Location = new Point(7, 22);
             txtAck.Multiline = true;
             txtAck.Name = "txtAck";
-            txtAck.Size = new Size(490, 103);
+            txtAck.Size = new Size(474, 100);
             txtAck.TabIndex = 5;
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(8, 9);
-            label2.Name = "label2";
-            label2.Size = new Size(85, 15);
-            label2.TabIndex = 6;
-            label2.Text = "Received ACK";
             // 
             // label3
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            label3.Location = new Point(514, 477);
+            label3.Location = new Point(25, 70);
             label3.Name = "label3";
             label3.Size = new Size(137, 15);
             label3.TabIndex = 8;
@@ -139,17 +133,18 @@
             // 
             // txttotalQueue
             // 
-            txttotalQueue.Location = new Point(685, 474);
+            txttotalQueue.Location = new Point(168, 67);
             txttotalQueue.Name = "txttotalQueue";
+            txttotalQueue.PlaceholderText = "0";
             txttotalQueue.ReadOnly = true;
-            txttotalQueue.Size = new Size(187, 23);
+            txttotalQueue.Size = new Size(80, 23);
             txttotalQueue.TabIndex = 7;
             // 
             // label4
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            label4.Location = new Point(514, 514);
+            label4.Location = new Point(254, 70);
             label4.Name = "label4";
             label4.Size = new Size(165, 15);
             label4.TabIndex = 9;
@@ -157,10 +152,11 @@
             // 
             // txtlastSequence
             // 
-            txtlastSequence.Location = new Point(685, 511);
+            txtlastSequence.Location = new Point(425, 67);
             txtlastSequence.Name = "txtlastSequence";
+            txtlastSequence.PlaceholderText = "0";
             txtlastSequence.ReadOnly = true;
-            txtlastSequence.Size = new Size(187, 23);
+            txtlastSequence.Size = new Size(80, 23);
             txtlastSequence.TabIndex = 10;
             // 
             // txtLogs
@@ -196,6 +192,7 @@
             // 
             txtfolderPath.Location = new Point(8, 97);
             txtfolderPath.Name = "txtfolderPath";
+            txtfolderPath.PlaceholderText = "C:\\HL7Sender";
             txtfolderPath.ReadOnly = true;
             txtfolderPath.Size = new Size(311, 23);
             txtfolderPath.TabIndex = 15;
@@ -224,26 +221,15 @@
             // 
             lstMessages.FormattingEnabled = true;
             lstMessages.ItemHeight = 15;
-            lstMessages.Location = new Point(514, 27);
+            lstMessages.Location = new Point(6, 22);
             lstMessages.Name = "lstMessages";
-            lstMessages.Size = new Size(537, 439);
+            lstMessages.Size = new Size(525, 394);
             lstMessages.TabIndex = 18;
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label6.Location = new Point(511, 9);
-            label6.Name = "label6";
-            label6.Size = new Size(95, 15);
-            label6.TabIndex = 19;
-            label6.Text = "Message Queue";
-            label6.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // chkArchive
             // 
             chkArchive.AutoSize = true;
-            chkArchive.Location = new Point(889, 496);
+            chkArchive.Location = new Point(136, 48);
             chkArchive.Name = "chkArchive";
             chkArchive.Size = new Size(146, 19);
             chkArchive.TabIndex = 20;
@@ -252,7 +238,7 @@
             // 
             // btnRequeueFailed
             // 
-            btnRequeueFailed.Location = new Point(7, 66);
+            btnRequeueFailed.Location = new Point(7, 70);
             btnRequeueFailed.Name = "btnRequeueFailed";
             btnRequeueFailed.Size = new Size(106, 23);
             btnRequeueFailed.TabIndex = 21;
@@ -262,7 +248,7 @@
             // 
             // progressBarSend
             // 
-            progressBarSend.Location = new Point(136, 66);
+            progressBarSend.Location = new Point(134, 70);
             progressBarSend.Name = "progressBarSend";
             progressBarSend.Size = new Size(315, 23);
             progressBarSend.TabIndex = 22;
@@ -313,6 +299,7 @@
             // 
             txtSendingHost.Location = new Point(98, 49);
             txtSendingHost.Name = "txtSendingHost";
+            txtSendingHost.PlaceholderText = "127.0.0.1";
             txtSendingHost.Size = new Size(122, 23);
             txtSendingHost.TabIndex = 30;
             // 
@@ -325,7 +312,6 @@
             label9.Size = new Size(33, 15);
             label9.TabIndex = 31;
             label9.Text = "Host";
-            label9.Click += label9_Click;
             // 
             // numPort
             // 
@@ -373,6 +359,7 @@
             groupBox3.Controls.Add(btn_sendAll);
             groupBox3.Controls.Add(btnRequeueFailed);
             groupBox3.Controls.Add(progressBarSend);
+            groupBox3.Controls.Add(chkArchive);
             groupBox3.Location = new Point(10, 448);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(490, 100);
@@ -380,27 +367,54 @@
             groupBox3.TabStop = false;
             groupBox3.Text = "Controls";
             // 
+            // groupBox4
+            // 
+            groupBox4.Controls.Add(txtAck);
+            groupBox4.Location = new Point(10, 12);
+            groupBox4.Name = "groupBox4";
+            groupBox4.Size = new Size(490, 128);
+            groupBox4.TabIndex = 36;
+            groupBox4.TabStop = false;
+            groupBox4.Text = "Received ACK";
+            // 
+            // groupBox5
+            // 
+            groupBox5.Controls.Add(lstMessages);
+            groupBox5.Location = new Point(514, 12);
+            groupBox5.Name = "groupBox5";
+            groupBox5.Size = new Size(537, 430);
+            groupBox5.TabIndex = 37;
+            groupBox5.TabStop = false;
+            groupBox5.Text = "Message Queue";
+            // 
+            // groupBox6
+            // 
+            groupBox6.Controls.Add(label3);
+            groupBox6.Controls.Add(txttotalQueue);
+            groupBox6.Controls.Add(label4);
+            groupBox6.Controls.Add(txtlastSequence);
+            groupBox6.Location = new Point(514, 448);
+            groupBox6.Name = "groupBox6";
+            groupBox6.Size = new Size(531, 100);
+            groupBox6.TabIndex = 38;
+            groupBox6.TabStop = false;
+            groupBox6.Text = "Statistics";
+            // 
             // HL7Sender
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1063, 556);
+            Controls.Add(groupBox6);
+            Controls.Add(groupBox5);
+            Controls.Add(groupBox4);
             Controls.Add(groupBox3);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Controls.Add(lblProgress);
-            Controls.Add(chkArchive);
-            Controls.Add(label6);
-            Controls.Add(lstMessages);
-            Controls.Add(txtlastSequence);
-            Controls.Add(label4);
-            Controls.Add(label3);
-            Controls.Add(txttotalQueue);
-            Controls.Add(label2);
-            Controls.Add(txtAck);
             Name = "HL7Sender";
             Text = "HL7 TCP Sender";
-            FormClosing += Form1_FormClosing;
+            FormClosing += HL7Sender_FormClosing;
             ((System.ComponentModel.ISupportInitialize)numDelayMs).EndInit();
             ((System.ComponentModel.ISupportInitialize)numMaxRetries).EndInit();
             ((System.ComponentModel.ISupportInitialize)numPort).EndInit();
@@ -409,6 +423,12 @@
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
             groupBox3.ResumeLayout(false);
+            groupBox3.PerformLayout();
+            groupBox4.ResumeLayout(false);
+            groupBox4.PerformLayout();
+            groupBox5.ResumeLayout(false);
+            groupBox6.ResumeLayout(false);
+            groupBox6.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -420,7 +440,6 @@
         private Button btn_sendAll;
         private Label label1;
         private TextBox txtAck;
-        private Label label2;
         private Label label3;
         private TextBox txttotalQueue;
         private Label label4;
@@ -433,7 +452,6 @@
         private Label lblmessagePath;
         private Button btn_clearPath;
         private ListBox lstMessages;
-        private Label label6;
         private CheckBox chkArchive;
         private Button btnRequeueFailed;
         private ProgressBar progressBarSend;
@@ -448,5 +466,8 @@
         private GroupBox groupBox1;
         private GroupBox groupBox2;
         private GroupBox groupBox3;
+        private GroupBox groupBox4;
+        private GroupBox groupBox5;
+        private GroupBox groupBox6;
     }
 }
