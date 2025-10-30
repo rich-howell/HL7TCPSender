@@ -307,9 +307,12 @@
             // numPort
             // 
             numPort.Location = new Point(8, 49);
+            numPort.Maximum = new decimal(new int[] { 5000, 0, 0, 0 });
+            numPort.Minimum = new decimal(new int[] { 4000, 0, 0, 0 });
             numPort.Name = "numPort";
             numPort.Size = new Size(84, 23);
             numPort.TabIndex = 32;
+            numPort.Value = new decimal(new int[] { 4000, 0, 0, 0 });
             // 
             // groupBox1
             // 
