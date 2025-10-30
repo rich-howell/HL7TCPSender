@@ -10,10 +10,15 @@ namespace HL7TCPSender
     public partial class HL7Sender : Form
     {
         private Queue<string> messageFiles = new Queue<string>();
+        private UILogger _uiLogger;
 
         public HL7Sender()
         {
             InitializeComponent();
+
+            _uiLogger = new UILogger();
+            _uiLogger.OnLog += UILogger_OnLog;
+
             var config = LoadConfig();
             txtSendingHost.Text = config.SendingHost;
 
@@ -31,7 +36,7 @@ namespace HL7TCPSender
                 );
 
                 numPort.Value = portMin;
-                Log($"Invalid port in configuration ({config.Port}). Reverting to minimum allowed value {portMin}.");
+                _uiLogger.Info($"Invalid port in configuration ({config.Port}). Reverting to minimum allowed value {portMin}.");
 
             }
             else
@@ -44,15 +49,30 @@ namespace HL7TCPSender
             numMaxRetries.Value = config.MaxRetries;
         }
 
-        private void Log(string message)
+        private void UILogger_OnLog(string message)
+        {
+            Color color = Color.Black;
+            if (message.Contains("Error", StringComparison.OrdinalIgnoreCase)) color = Color.IndianRed;
+            else if (message.Contains("Warning", StringComparison.OrdinalIgnoreCase)) color = Color.Gold;
+            else if (message.Contains("Information", StringComparison.OrdinalIgnoreCase)) color = Color.DarkGreen;
+            else if (message.Contains("Debug", StringComparison.OrdinalIgnoreCase)) color = Color.DodgerBlue;
+
+            AppendColoredText(message + Environment.NewLine, color);
+        }
+
+        private void AppendColoredText(string text, Color color)
         {
             if (txtLogs.InvokeRequired)
             {
-                txtLogs.Invoke(new Action(() => txtLogs.Text = message));
+                txtLogs.BeginInvoke(new Action(() => AppendColoredText(text, color)));
                 return;
             }
 
-            txtLogs.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}\r\n");
+            txtLogs.SelectionStart = txtLogs.TextLength;
+            txtLogs.SelectionColor = color;
+            txtLogs.AppendText(text);
+            txtLogs.SelectionColor = txtLogs.ForeColor;
+            txtLogs.ScrollToCaret();
         }
 
         private void ResetProgress(int total)
@@ -87,7 +107,7 @@ namespace HL7TCPSender
             }
             catch (Exception ex)
             {
-                Log($"Error parsing {Path.GetFileName(filePath)}: {ex.Message}");
+                _uiLogger.Error($"Parsing {Path.GetFileName(filePath)}: {ex.Message} failed");
                 return "";
             }
         }
@@ -137,7 +157,7 @@ namespace HL7TCPSender
             {
                 if (total == 0)
                 {
-                    Log($"No messages in queue");
+                    _uiLogger.Info($"No messages in queue");
                     return;
                 }
 
@@ -160,7 +180,7 @@ namespace HL7TCPSender
                     }
                     else
                     {
-                        Log($"Stopping due to repeated failure on {Path.GetFileName(nextFile)}");
+                        _uiLogger.Info($"Stopping due to repeated failure on {Path.GetFileName(nextFile)}");
                         break;
                     }
 
@@ -169,7 +189,7 @@ namespace HL7TCPSender
 
                 progressBarSend.Value = progressBarSend.Maximum;
                 lblProgress.Text = $"{sentCount} / {total} sent";
-                Log("Sending Complete!");
+                _uiLogger.Info("Sending Complete!");
             }
             finally
             {
@@ -191,7 +211,7 @@ namespace HL7TCPSender
 
             for (int attempt = 1; attempt <= MaxRetries; attempt++)
             {
-                Log($" Sending {fileName} (Attempt {attempt}/{MaxRetries})");
+                _uiLogger.Info($" Sending {fileName} (Attempt {attempt}/{MaxRetries})");
 
                 try
                 {
@@ -225,7 +245,7 @@ namespace HL7TCPSender
                             if (ackData.Count > 0)
                             {
                                 string ack = DecodeAck(ackData.ToArray());
-                                Log($"ACK received for {fileName}");
+                                _uiLogger.Info($"ACK received for {fileName}");
                                 txtAck.Text = ack;
                                 progressBarSend.Style = ProgressBarStyle.Continuous;
 
@@ -267,20 +287,20 @@ namespace HL7TCPSender
                             }
                             else
                             {
-                                Log("No ACK received, retrying...");
+                                _uiLogger.Info("No ACK received, retrying...");
                             }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log($"Error: {ex.Message}");
+                    _uiLogger.Error($"{ex.Message}");
                 }
 
                 await Task.Delay(1000);
             }
 
-            Log($"Failed to send {fileName} after {MaxRetries} retries.");
+            _uiLogger.Info($"Failed to send {fileName} after {MaxRetries} retries.");
             progressBarSend.Style = ProgressBarStyle.Continuous;
             ArchiveMessage(filePath, "Failed");
             return false;
@@ -299,11 +319,11 @@ namespace HL7TCPSender
 
                 // Overwrite if it already exists
                 File.Move(filePath, destination, true);
-                Log($"Moved {fileName} ? {subfolder}");
+                _uiLogger.Info($"Moved {fileName} ? {subfolder}");
             }
             catch (Exception ex)
             {
-                Log($"Error moving file {filePath}: {ex.Message}");
+                _uiLogger.Error($"Moving file {filePath}: {ex.Message}");
             }
         }
 
@@ -314,16 +334,16 @@ namespace HL7TCPSender
                 if (File.Exists(filePath))
                 {
                     File.Delete(filePath);
-                    Log($"Deleted message file: {Path.GetFileName(filePath)}");
+                    _uiLogger.Info($"Deleted message file: {Path.GetFileName(filePath)}");
                 }
                 else
                 {
-                    Log($"File not found for deletion: {filePath}");
+                    _uiLogger.Info($"File not found for deletion: {filePath}");
                 }
             }
             catch (Exception ex)
             {
-                Log($"Error deleting file {filePath}: {ex.Message}");
+                _uiLogger.Error($"Deleting file {filePath}: {ex.Message}");
             }
         }
 
@@ -367,7 +387,7 @@ namespace HL7TCPSender
 
             if (total == 0)
             {
-                Log("No HL7 messages found in folder.");
+                _uiLogger.Info("No HL7 messages found in folder.");
                 return;
             }
 
@@ -394,7 +414,7 @@ namespace HL7TCPSender
                         string seq = terser.Get("/MSH-10") ?? "0";
                         fileWithSeqConcurrent.Add((file, seq));
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         fileWithSeqConcurrent.Add((file, "0"));
                     }
@@ -431,7 +451,7 @@ namespace HL7TCPSender
                 lstMessages.Items.Add(Path.GetFileName(file));
 
             lblProgress.Text = $"Queued {sortedFiles.Count} message(s)";
-            Log($"Queued {sortedFiles.Count} messages from {folder} (sorted by MSH-10).");
+            _uiLogger.Info($"Queued {sortedFiles.Count} messages from {folder} (sorted by MSH-10).");
         }
 
         private async void btn_sendSingle_Click(object sender, EventArgs e)
@@ -448,7 +468,7 @@ namespace HL7TCPSender
             {
                 if (messageFiles.Count == 0)
                 {
-                    Log("No messages in queue.");
+                    _uiLogger.Info("No messages in queue.");
                     return;
                 }
 
@@ -462,7 +482,7 @@ namespace HL7TCPSender
                 {
                     IncrementProgress(1, 1);
                     lblProgress.Text = "1 / 1 sent successfully";
-                    Log("Single message sent successfully!");
+                    _uiLogger.Info("Single message sent successfully!");
                 }
                 else
                 {
@@ -490,7 +510,7 @@ namespace HL7TCPSender
 
             if (!Directory.Exists(failedFolder))
             {
-                Log("No 'Failed' folder found.");
+                _uiLogger.Info("No 'Failed' folder found.");
                 return;
             }
 
@@ -498,7 +518,7 @@ namespace HL7TCPSender
 
             if (failedFiles.Length == 0)
             {
-                Log("No failed messages to re-queue.");
+                _uiLogger.Info("No failed messages to re-queue.");
                 return;
             }
 
@@ -514,11 +534,11 @@ namespace HL7TCPSender
                 }
                 catch (Exception ex)
                 {
-                    Log($"Failed to move {Path.GetFileName(file)}: {ex.Message}");
+                    _uiLogger.Error($"Failed to move {Path.GetFileName(file)}: {ex.Message}");
                 }
             }
 
-            Log($"Re-queued {movedCount} failed message(s).");
+            _uiLogger.Info($"Re-queued {movedCount} failed message(s).");
 
             // Optionally reload the list of queued messages
             btn_queueMessages_Click(sender, e);
@@ -542,7 +562,7 @@ namespace HL7TCPSender
             }
             catch (Exception ex)
             {
-                Log($"Failed to load config: {ex.Message}");
+                _uiLogger.Error($"Failed to load config: {ex.Message}");
             }
             return new AppConfig(); // defaults
         }
@@ -554,11 +574,11 @@ namespace HL7TCPSender
                 string path = GetConfigPath();
                 string json = JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(path, json);
-                Log("Configuration saved.");
+                _uiLogger.Info("Configuration saved.");
             }
             catch (Exception ex)
             {
-                Log($"Failed to save config: {ex.Message}");
+                _uiLogger.Error($"Failed to save config: {ex.Message}");
             }
         }
 
