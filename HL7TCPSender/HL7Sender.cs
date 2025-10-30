@@ -1,4 +1,3 @@
-using NHapi.Base.Model;
 using NHapi.Base.Parser;
 using NHapi.Base.Util;
 using System.Net.Sockets;
@@ -17,24 +16,32 @@ namespace HL7TCPSender
             InitializeComponent();
             var config = LoadConfig();
             txtSendingHost.Text = config.SendingHost;
-            txtPort.Text = config.Port.ToString();
+
+            int portMax = (int)numPort.Maximum;
+            int portMin = (int)numPort.Minimum;
+
+            if (config.Port < portMin || config.Port > portMax)
+            {
+                MessageBox.Show(
+                    $"The port number in appsettings.json ({config.Port}) is outside the allowed range.\n" +
+                    $"Please select a value between {portMin} and {portMax}.",
+                    "Invalid Configuration Value",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+
+                numPort.Value = portMin;
+                Log($"Invalid port in configuration ({config.Port}). Reverting to minimum allowed value {portMin}.");
+
+            }
+            else
+            {
+                numPort.Value = config.Port;
+            }
+
             txtfolderPath.Text = config.FolderPath;
             numDelayMs.Value = config.DelayMs;
             numMaxRetries.Value = config.MaxRetries;
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            var config = new AppConfig
-            {
-                SendingHost = txtSendingHost.Text,
-                Port = int.TryParse(txtPort.Text, out int p) ? p : 4040,
-                FolderPath = txtfolderPath.Text,
-                DelayMs = (int)numDelayMs.Value,
-                MaxRetries = (int)numMaxRetries.Value
-            };
-
-            SaveConfig(config);
         }
 
         private void Log(string message)
@@ -100,7 +107,7 @@ namespace HL7TCPSender
 
         private void btn_clearLogs_Click(object sender, EventArgs e)
         {
-            if (txtLogs.Text.Length > 0)
+            if (!string.IsNullOrWhiteSpace(txtLogs.Text))
             {
                 txtLogs.Clear();
             }
@@ -108,7 +115,7 @@ namespace HL7TCPSender
 
         private void btn_clearPath_Click(object sender, EventArgs e)
         {
-            if (txtfolderPath.Text.Length > 0)
+            if (!string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
             {
                 txtfolderPath.Clear();
             }
@@ -116,13 +123,18 @@ namespace HL7TCPSender
 
         private async void btn_sendAll_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
+            {
+                MessageBox.Show("Select a Message Path before queuing messages");
+                return;
+            }
+
             btn_sendAll.Enabled = false;
             btn_sendSingle.Enabled = false;
-            int total = messageFiles.Count;           
+            int total = messageFiles.Count;
 
             try
             {
-
                 if (total == 0)
                 {
                     Log($"No messages in queue");
@@ -158,7 +170,7 @@ namespace HL7TCPSender
                 progressBarSend.Value = progressBarSend.Maximum;
                 lblProgress.Text = $"{sentCount} / {total} sent";
                 Log("Sending Complete!");
-            } 
+            }
             finally
             {
                 btn_sendAll.Enabled = true;
@@ -169,7 +181,7 @@ namespace HL7TCPSender
         private async Task<bool> SendMessageAsync(string filePath)
         {
             string host = txtSendingHost.Text.Trim();
-            int port = int.TryParse(txtPort.Text.Trim(), out int parsedPort) ? parsedPort : 4040;
+            int port = (int)numPort.Value;
             int MaxRetries = (int)numMaxRetries.Value;
             string hl7 = await File.ReadAllTextAsync(filePath);
             string fileName = Path.GetFileName(filePath);
@@ -249,7 +261,7 @@ namespace HL7TCPSender
                                     int messagesRemaining = int.Parse(txttotalQueue.Text) - 1;
                                     txttotalQueue.Text = messagesRemaining.ToString();
                                 }));
-                               
+
                                 await Task.Delay((int)numDelayMs.Value);
                                 return true;
                             }
@@ -336,6 +348,12 @@ namespace HL7TCPSender
 
         private async void btn_queueMessages_Click(object sender, EventArgs e)
         {
+            if (!string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
+            {
+                MessageBox.Show("Select a Message Path before queuing messages");
+                return;
+            }
+
             string folder = txtfolderPath.Text.Trim();
 
             if (!Directory.Exists(folder))
@@ -347,7 +365,7 @@ namespace HL7TCPSender
             var files = Directory.GetFiles(folder, "*.hl7");
             int total = files.Length;
 
-            if(total == 0)
+            if (total == 0)
             {
                 Log("No HL7 messages found in folder.");
                 return;
@@ -418,6 +436,12 @@ namespace HL7TCPSender
 
         private async void btn_sendSingle_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
+            {
+                MessageBox.Show("Select a Message Path before queuing messages");
+                return;
+            }
+
             btn_sendAll.Enabled = false;
             btn_sendSingle.Enabled = false;
             try
@@ -443,8 +467,8 @@ namespace HL7TCPSender
                 else
                 {
                     lblProgress.Text = "0 / 1 sent (failed)";
-                }            
-            } 
+                }
+            }
             finally
             {
                 btn_sendAll.Enabled = true;
@@ -454,7 +478,13 @@ namespace HL7TCPSender
 
         private void btnRequeueFailed_Click(object sender, EventArgs e)
         {
-            string baseFolder = txtfolderPath.Text.Trim(); // or your configured folder
+            if (string.IsNullOrWhiteSpace(txtfolderPath.Text.Trim()))
+            {
+                MessageBox.Show("Select a Message Path before attempting to move failed messages");
+                return;
+            }
+
+            string baseFolder = txtfolderPath.Text.Trim();
             string failedFolder = Path.Combine(baseFolder, "Failed");
             string toSendFolder = baseFolder;
 
@@ -491,7 +521,7 @@ namespace HL7TCPSender
             Log($"Re-queued {movedCount} failed message(s).");
 
             // Optionally reload the list of queued messages
-            btn_queueMessages_Click(sender, e);            
+            btn_queueMessages_Click(sender, e);
         }
 
         private string GetConfigPath()
@@ -532,5 +562,18 @@ namespace HL7TCPSender
             }
         }
 
+        private void HL7Sender_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            var config = new AppConfig
+            {
+                SendingHost = txtSendingHost.Text,
+                Port = (int)numPort.Value,
+                FolderPath = txtfolderPath.Text,
+                DelayMs = (int)numDelayMs.Value,
+                MaxRetries = (int)numMaxRetries.Value
+            };
+
+            SaveConfig(config);
+        }
     }
 }
